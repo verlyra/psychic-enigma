@@ -13,12 +13,31 @@
     <title>VEND.IO - Store</title>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap CSS for Carousel -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #e5e7eb; }
         .brutal-shadow { box-shadow: 8px 8px 0px 0px rgba(0,0,0,1); }
         .brutal-btn { box-shadow: 4px 4px 0px 0px rgba(0,0,0,1); }
         .brutal-btn:active { box-shadow: 0px 0px 0px 0px rgba(0,0,0,1); transform: translate(4px, 4px); }
+        
+        /* Bootstrap override for Tailwind compatibility */
+        a { text-decoration: none; }
+        
+        /* Carousel Customization */
+        .carousel-item img {
+            height: 400px;
+            width: 100%;
+            object-fit: cover;
+            border: 4px solid black;
+        }
+        .carousel-control-prev-icon, .carousel-control-next-icon {
+            background-color: black;
+            border-radius: 50%;
+            padding: 1.5rem;
+            border: 3px solid white;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -34,7 +53,7 @@
                             <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                         </svg>
                     </div>
-                    <h1 class="text-3xl font-[900] italic tracking-tighter text-black">VEND.IO</h1>
+                    <h1 class="text-3xl font-[900] italic tracking-tighter text-black m-0">VEND.IO</h1>
                 </div>
 
                 <!-- Search -->
@@ -49,8 +68,8 @@
                 <div class="flex items-center gap-6">
                     <% if(isLoggedIn) { %>
                     <div class="text-right hidden md:block">
-                        <p class="text-xs font-[900] text-black tracking-widest uppercase">HELLO,</p>
-                        <p class="text-lg font-[900] text-black uppercase"><%= userName %></p>
+                        <p class="text-xs font-[900] text-black tracking-widest uppercase m-0">HELLO,</p>
+                        <p class="text-lg font-[900] text-black uppercase m-0"><%= userName %></p>
                     </div>
                     <a href="logout.jsp" class="bg-white border-[3px] border-black p-2 brutal-btn hover:bg-red-500 hover:text-white transition-colors" title="Logout">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -67,16 +86,41 @@
     <!-- Main Content: Catalog -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
-        <div class="mb-12 bg-[#4ADE80] border-[4px] border-black p-8 md:p-12 brutal-shadow flex items-center justify-between relative overflow-hidden">
-            <div class="relative z-10">
-                <h2 class="text-4xl md:text-5xl font-[900] text-black mb-4 uppercase tracking-tighter drop-shadow-[2px_2px_0px_rgba(255,255,255,1)]">FRESH & FAST</h2>
-                <p class="text-black font-bold text-lg md:text-xl border-l-[4px] border-black pl-4">Order now, we deliver in minutes!</p>
-            </div>
-            <div class="hidden md:block relative z-10">
-                 <svg class="text-black drop-shadow-[4px_4px_0px_rgba(255,255,255,1)]" xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l2.5-4H18l2 4M3 12h18v8H3z"></path></svg>
-            </div>
-            <div class="absolute -right-10 -bottom-10 opacity-20 transform rotate-12">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="4"><circle cx="12" cy="12" r="10"></circle></svg>
+        <!-- Carousel Header -->
+        <div class="mb-12">
+            <div id="promoCarousel" class="carousel slide brutal-shadow border-[4px] border-black bg-white" data-bs-ride="carousel">
+                <div class="carousel-indicators mb-2">
+                    <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="0" class="active" style="background-color: black; height: 10px; width: 30px;"></button>
+                    <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="1" style="background-color: black; height: 10px; width: 30px;"></button>
+                    <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="2" style="background-color: black; height: 10px; width: 30px;"></button>
+                    <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="3" style="background-color: black; height: 10px; width: 30px;"></button>
+                    <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="4" style="background-color: black; height: 10px; width: 30px;"></button>
+                </div>
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJFVt7S5TwqcxjD4hOKwxVfeF-SZ_7auSOLg&s" alt="Promo 1">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpCAXZjt2MaFFBTW1hr05beTQtp-I6ps-law&s" alt="Promo 2">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="https://static.vecteezy.com/system/resources/thumbnails/002/294/859/small/flash-sale-web-banner-design-e-commerce-online-shopping-header-or-footer-banner-free-vector.jpg" alt="Flash Sale">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="https://images.all-free-download.com/images/graphicwebp/ecommerce_website_banner_template_presents_buyer_leaves_decor_6920123.webp" alt="Promo 4">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="https://images.all-free-download.com/images/graphicwebp/ecommerce_website_banner_template_shoppers_sketch_6920121.webp" alt="Promo 5">
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#promoCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#promoCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
             </div>
         </div>
 
@@ -107,8 +151,8 @@
                 </div>
                 <h4 class="font-[900] text-black text-lg uppercase leading-tight mb-2 flex-1"><%= rs.getString("nama_produk") %></h4>
                 <div class="mt-auto">
-                    <p class="font-[900] text-2xl text-black mb-3">Rp<%= String.format("%,.0f", rs.getDouble("harga")) %></p>
-                    <div class="flex items-center justify-between">
+                    <p class="font-[900] text-2xl text-black mb-3 m-0">Rp<%= String.format("%,.0f", rs.getDouble("harga_jual")) %></p>
+                    <div class="flex items-center justify-between mt-2">
                         <span class="text-xs font-[900] text-black border-[2px] border-black px-2 py-1 uppercase bg-[#FACC15]">STOCK: <%= rs.getInt("stok") %></span>
                         <button class="bg-[#3498DB] text-white border-[3px] border-black w-10 h-10 flex items-center justify-center brutal-btn hover:bg-blue-600 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -123,7 +167,7 @@
             %>
                         <div class="col-span-full py-20 text-center">
                             <div class="bg-white border-[4px] border-black inline-block p-10 brutal-shadow">
-                                <p class="font-[900] text-2xl text-black uppercase tracking-widest">No Items Available.</p>
+                                <p class="font-[900] text-2xl text-black uppercase tracking-widest m-0">No Items Available.</p>
                             </div>
                         </div>
             <%
@@ -142,9 +186,11 @@
         </div>
         
         <div class="text-center mt-20 pb-10">
-            <p class="font-bold text-gray-400 text-sm">Developed by Dandy & Verly</p>
+            <p class="font-bold text-gray-400 text-sm m-0">Developed by Dandy & Verly</p>
         </div>
     </main>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

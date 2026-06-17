@@ -12,9 +12,10 @@
         try {
             koneksi k = new koneksi();
             Connection conn = k.bukaKoneksi();
-            String sql = "INSERT INTO master_kategori (nama_kategori) VALUES (?)";
+            String sql = "INSERT INTO master_kategori (nama_kategori, deskripsi) VALUES (?, ?)";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, request.getParameter("nama_kategori"));
+            pstmt.setString(2, request.getParameter("deskripsi"));
             pstmt.executeUpdate();
             pstmt.close();
             conn.close();
@@ -25,10 +26,11 @@
         try {
             koneksi k = new koneksi();
             Connection conn = k.bukaKoneksi();
-            String sql = "UPDATE master_kategori SET nama_kategori=? WHERE id=?";
+            String sql = "UPDATE master_kategori SET nama_kategori=?, deskripsi=? WHERE id=?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, request.getParameter("nama_kategori"));
-            pstmt.setInt(2, Integer.parseInt(request.getParameter("id")));
+            pstmt.setString(2, request.getParameter("deskripsi"));
+            pstmt.setInt(3, Integer.parseInt(request.getParameter("id")));
             pstmt.executeUpdate();
             pstmt.close();
             conn.close();
@@ -83,6 +85,7 @@
                 <a href="dashboard.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">Dashboard</a>
                 <a href="products.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">INVENTORY</a>
                 <a href="kategori.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase bg-[#FACC15] text-black">MASTER KATEGORI</a>
+                <a href="ukuran.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER UKURAN</a>
                 <a href="users.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER USER</a>
                 <a href="gudang.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER GUDANG</a>
             </nav>
@@ -110,6 +113,7 @@
                         <tr class="border-b-[4px] border-black">
                             <th class="py-3 font-[900] text-black uppercase tracking-wider w-20">ID</th>
                             <th class="py-3 font-[900] text-black uppercase tracking-wider">CATEGORY NAME</th>
+                            <th class="py-3 font-[900] text-black uppercase tracking-wider">DESCRIPTION</th>
                             <th class="py-3 font-[900] text-black uppercase tracking-wider text-right whitespace-nowrap">ACTION</th>
                         </tr>
                     </thead>
@@ -120,13 +124,15 @@
                                 Connection conn = k.bukaKoneksi();
                                 Statement stmt = conn.createStatement();
                                 ResultSet rs = stmt.executeQuery("SELECT * FROM master_kategori ORDER BY id DESC");
-                                while(rs.next()) {
+                        while(rs.next()) {
+                            String desc = rs.getString("deskripsi") != null ? rs.getString("deskripsi") : "-";
                         %>
                         <tr class="font-bold border-b border-gray-200">
                             <td class="py-4"><%= rs.getInt("id") %></td>
                             <td class="py-4 uppercase"><%= rs.getString("nama_kategori") %></td>
+                            <td class="py-4 uppercase"><%= desc %></td>
                             <td class="py-4 text-right whitespace-nowrap">
-                                <a href="javascript:void(0)" onclick="openEditKategori(<%= rs.getInt("id") %>, '<%= rs.getString("nama_kategori").replace("'", "\\'") %>')" class="text-[#3498DB] font-[900] uppercase text-sm">EDIT</a>
+                                <a href="javascript:void(0)" onclick="openEditKategori(<%= rs.getInt("id") %>, '<%= rs.getString("nama_kategori").replace("'", "\\'") %>', '<%= desc.replace("'", "\\'").replace("\n", " ") %>')" class="text-[#3498DB] font-[900] uppercase text-sm">EDIT</a>
                                 <span class="text-black font-black mx-1">|</span>
                                 <a href="kategori.jsp?action=delete&id=<%= rs.getInt("id") %>" class="text-red-500 hover:text-red-700 font-[900] uppercase text-sm" onclick="return confirm('Hapus kategori ini?');">DELETE</a>
                             </td>
@@ -161,6 +167,10 @@
                         <label class="block font-[900] text-black tracking-wider uppercase mb-1">CATEGORY NAME</label>
                         <input type="text" name="nama_kategori" required class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none">
                     </div>
+                    <div>
+                        <label class="block font-[900] text-black tracking-wider uppercase mb-1">DESCRIPTION</label>
+                        <textarea name="deskripsi" class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none h-24"></textarea>
+                    </div>
 
                     <div class="flex items-center gap-4 mt-4">
                         <button type="submit" class="bg-[#3498DB] border-[4px] border-black px-8 py-3 font-[900] text-white tracking-wider uppercase brutal-btn-shadow hover:bg-blue-600 transition-colors flex-1 text-center">
@@ -188,6 +198,10 @@
                         <label class="block font-[900] text-black tracking-wider uppercase mb-1">CATEGORY NAME</label>
                         <input type="text" name="nama_kategori" id="edit_nama" required class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none">
                     </div>
+                    <div>
+                        <label class="block font-[900] text-black tracking-wider uppercase mb-1">DESCRIPTION</label>
+                        <textarea name="deskripsi" id="edit_deskripsi" class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none h-24"></textarea>
+                    </div>
 
                     <div class="flex items-center gap-4 mt-4">
                         <button type="submit" class="bg-[#3498DB] border-[4px] border-black px-8 py-3 font-[900] text-white tracking-wider uppercase brutal-btn-shadow hover:bg-blue-600 transition-colors flex-1 text-center">
@@ -203,9 +217,10 @@
     </div>
 
     <script>
-        function openEditKategori(id, nama) {
+        function openEditKategori(id, nama, deskripsi) {
             document.getElementById('edit_id').value = id;
             document.getElementById('edit_nama').value = nama;
+            document.getElementById('edit_deskripsi').value = deskripsi !== '-' ? deskripsi : '';
             document.getElementById('editModal').classList.remove('hidden');
         }
     </script>

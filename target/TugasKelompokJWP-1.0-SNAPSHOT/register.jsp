@@ -20,6 +20,8 @@
 
         String username = getParam(request, "username");
         String fullName = getParam(request, "nama_lengkap");
+        String noTelp = getParam(request, "no_telp");
+        String alamat = getParam(request, "alamat");
         String password = getParam(request, "password");
         String confirmPassword = getParam(request, "confirm_password");
 
@@ -58,13 +60,15 @@
                     rsMax.close();
                     pstmtMax.close();
 
-                    // Insert new user
-                    String sql = "INSERT INTO master_user (id, username, kata_sandi, nama_lengkap, role) VALUES (?, ?, ?, ?, 'customer')";
+                    // Insert new user with no_telp and alamat
+                    String sql = "INSERT INTO master_user (id, username, kata_sandi, nama_lengkap, no_telp, alamat, role) VALUES (?, ?, ?, ?, ?, ?, 'customer')";
                     pstmt = conn.prepareStatement(sql);
                     pstmt.setInt(1, newId);
                     pstmt.setString(2, username);
                     pstmt.setString(3, password);
                     pstmt.setString(4, fullName);
+                    pstmt.setString(5, noTelp);
+                    pstmt.setString(6, alamat);
                     
                     int rowsInserted = pstmt.executeUpdate();
                     if (rowsInserted > 0) {
@@ -111,7 +115,7 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-white border-[4px] border-black p-10 w-full max-w-[400px] neubrutalism-card">
+    <div class="bg-white border-[4px] border-black p-10 w-full max-w-[480px] neubrutalism-card">
         
         <!-- Logo Container -->
         <div class="flex flex-col items-center mb-10">
@@ -166,6 +170,18 @@
                 <label class="block text-sm font-black tracking-widest uppercase text-black mb-2">KONFIRMASI PASSWORD</label>
                 <input type="password" name="confirm_password" placeholder="Ulangi password" required
                     class="w-full border-[3px] border-black p-3 font-bold text-black focus:outline-none placeholder:text-gray-300">
+            </div>
+
+            <div>
+                <label class="block text-sm font-black tracking-widest uppercase text-black mb-2">NO. TELEPON</label>
+                <input type="tel" name="no_telp" placeholder="Contoh: 08123456789"
+                    class="w-full border-[3px] border-black p-3 font-bold text-black focus:outline-none placeholder:text-gray-300">
+            </div>
+
+            <div>
+                <label class="block text-sm font-black tracking-widest uppercase text-black mb-2">ALAMAT</label>
+                <textarea name="alamat" placeholder="Masukkan alamat lengkap Anda" rows="3"
+                    class="w-full border-[3px] border-black p-3 font-bold text-black focus:outline-none placeholder:text-gray-300 resize-none"></textarea>
             </div>
 
             <button type="submit" 

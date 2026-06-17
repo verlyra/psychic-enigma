@@ -12,10 +12,12 @@
         try {
             koneksi k = new koneksi();
             Connection conn = k.bukaKoneksi();
-            String sql = "INSERT INTO master_gudang (nama_gudang, lokasi) VALUES (?, ?)";
+            String sql = "INSERT INTO master_gudang (nama_gudang, lokasi, nama_pic, no_telp) VALUES (?, ?, ?, ?)";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, request.getParameter("nama_gudang"));
             pstmt.setString(2, request.getParameter("lokasi"));
+            pstmt.setString(3, request.getParameter("nama_pic"));
+            pstmt.setString(4, request.getParameter("no_telp"));
             pstmt.executeUpdate();
             pstmt.close();
             conn.close();
@@ -26,11 +28,13 @@
         try {
             koneksi k = new koneksi();
             Connection conn = k.bukaKoneksi();
-            String sql = "UPDATE master_gudang SET nama_gudang=?, lokasi=? WHERE id=?";
+            String sql = "UPDATE master_gudang SET nama_gudang=?, lokasi=?, nama_pic=?, no_telp=? WHERE id=?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, request.getParameter("nama_gudang"));
             pstmt.setString(2, request.getParameter("lokasi"));
-            pstmt.setInt(3, Integer.parseInt(request.getParameter("id")));
+            pstmt.setString(3, request.getParameter("nama_pic"));
+            pstmt.setString(4, request.getParameter("no_telp"));
+            pstmt.setInt(5, Integer.parseInt(request.getParameter("id")));
             pstmt.executeUpdate();
             pstmt.close();
             conn.close();
@@ -85,6 +89,7 @@
                 <a href="dashboard.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">Dashboard</a>
                 <a href="products.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">INVENTORY</a>
                 <a href="kategori.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER KATEGORI</a>
+                <a href="ukuran.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER UKURAN</a>
                 <a href="users.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER USER</a>
                 <a href="gudang.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase bg-[#FACC15] text-black">MASTER GUDANG</a>
             </nav>
@@ -107,11 +112,17 @@
             <div class="bg-white border-[4px] border-black flex-1 p-6 relative flex flex-col">
                 <h3 class="font-[900] text-2xl uppercase tracking-tighter mb-6 text-white bg-black inline-block relative -top-12 -left-2 px-4 pb-0 pt-2">MASTER GUDANG</h3>
                 
-                <table class="w-full text-left -mt-8 mb-auto">
+                <div class="-mt-8 mb-4">
+                    <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="SEARCH BY NAME, PIC, OR PHONE..." class="w-full border-[4px] border-black p-3 font-[900] text-black tracking-wider uppercase focus:outline-none">
+                </div>
+
+                <table class="w-full text-left mb-auto" id="dataTable">
                     <thead>
                         <tr class="border-b-[4px] border-black">
-                            <th class="py-3 font-[900] text-black uppercase tracking-wider w-20">ID</th>
-                            <th class="py-3 font-[900] text-black uppercase tracking-wider">WAREHOUSE NAME</th>
+                            <th class="py-3 font-[900] text-black uppercase tracking-wider w-16">ID</th>
+                            <th class="py-3 font-[900] text-black uppercase tracking-wider">WAREHOUSE</th>
+                            <th class="py-3 font-[900] text-black uppercase tracking-wider">PIC</th>
+                            <th class="py-3 font-[900] text-black uppercase tracking-wider">PHONE</th>
                             <th class="py-3 font-[900] text-black uppercase tracking-wider">LOCATION</th>
                             <th class="py-3 font-[900] text-black uppercase tracking-wider text-right whitespace-nowrap">ACTION</th>
                         </tr>
@@ -124,15 +135,19 @@
                                 Statement stmt = conn.createStatement();
                                 ResultSet rs = stmt.executeQuery("SELECT * FROM master_gudang ORDER BY id DESC");
                                 while(rs.next()) {
+                            String pic = rs.getString("nama_pic") != null ? rs.getString("nama_pic") : "-";
+                            String telp = rs.getString("no_telp") != null ? rs.getString("no_telp") : "-";
                         %>
                         <tr class="font-bold border-b border-gray-200">
                             <td class="py-4"><%= rs.getInt("id") %></td>
                             <td class="py-4 uppercase"><%= rs.getString("nama_gudang") %></td>
+                            <td class="py-4 uppercase"><%= pic %></td>
+                            <td class="py-4 uppercase"><%= telp %></td>
                             <td class="py-4 uppercase"><%= rs.getString("lokasi") %></td>
                             <td class="py-4 text-right whitespace-nowrap">
                                 <a href="gudang.jsp?action=info&id=<%= rs.getInt("id") %>" class="text-[#4ADE80] font-[900] uppercase text-sm">INFO</a>
                                 <span class="text-black font-black mx-1">|</span>
-                                <a href="javascript:void(0)" onclick="openEditGudang(<%= rs.getInt("id") %>, '<%= rs.getString("nama_gudang").replace("'", "\\'") %>', '<%= rs.getString("lokasi").replace("'", "\\'").replace("\n", " ") %>')" class="text-[#3498DB] font-[900] uppercase text-sm">EDIT</a>
+                                <a href="javascript:void(0)" onclick="openEditGudang(<%= rs.getInt("id") %>, '<%= rs.getString("nama_gudang").replace("'", "\\'") %>', '<%= pic.replace("'", "\\'") %>', '<%= telp.replace("'", "\\'") %>', '<%= rs.getString("lokasi").replace("'", "\\'").replace("\n", " ") %>')" class="text-[#3498DB] font-[900] uppercase text-sm">EDIT</a>
                                 <span class="text-black font-black mx-1">|</span>
                                 <a href="gudang.jsp?action=delete&id=<%= rs.getInt("id") %>" class="text-red-500 hover:text-red-700 font-[900] uppercase text-sm" onclick="return confirm('Hapus gudang ini?');">DELETE</a>
                             </td>
@@ -167,6 +182,16 @@
                         <label class="block font-[900] text-black tracking-wider uppercase mb-1">WAREHOUSE NAME</label>
                         <input type="text" name="nama_gudang" required class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none">
                     </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block font-[900] text-black tracking-wider uppercase mb-1">PIC NAME</label>
+                            <input type="text" name="nama_pic" class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-[900] text-black tracking-wider uppercase mb-1">PHONE NUMBER</label>
+                            <input type="text" name="no_telp" class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none">
+                        </div>
+                    </div>
                     <div>
                         <label class="block font-[900] text-black tracking-wider uppercase mb-1">LOCATION / ADDRESS</label>
                         <textarea name="lokasi" required class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none h-24"></textarea>
@@ -198,6 +223,16 @@
                         <label class="block font-[900] text-black tracking-wider uppercase mb-1">WAREHOUSE NAME</label>
                         <input type="text" name="nama_gudang" id="edit_nama" required class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none">
                     </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block font-[900] text-black tracking-wider uppercase mb-1">PIC NAME</label>
+                            <input type="text" name="nama_pic" id="edit_pic" class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-[900] text-black tracking-wider uppercase mb-1">PHONE NUMBER</label>
+                            <input type="text" name="no_telp" id="edit_telp" class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none">
+                        </div>
+                    </div>
                     <div>
                         <label class="block font-[900] text-black tracking-wider uppercase mb-1">LOCATION / ADDRESS</label>
                         <textarea name="lokasi" id="edit_lokasi" required class="w-full border-[4px] border-black p-3 font-bold text-black focus:outline-none h-24"></textarea>
@@ -217,11 +252,37 @@
     </div>
 
     <script>
-        function openEditGudang(id, nama, lokasi) {
+        function openEditGudang(id, nama, pic, telp, lokasi) {
             document.getElementById('edit_id').value = id;
             document.getElementById('edit_nama').value = nama;
+            document.getElementById('edit_pic').value = pic !== '-' ? pic : '';
+            document.getElementById('edit_telp').value = telp !== '-' ? telp : '';
             document.getElementById('edit_lokasi').value = lokasi;
             document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function searchTable() {
+            let input = document.getElementById("searchInput").value.toUpperCase();
+            let table = document.getElementById("dataTable");
+            let tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+                let tdName = tr[i].getElementsByTagName("td")[1];
+                let tdPic = tr[i].getElementsByTagName("td")[2];
+                let tdPhone = tr[i].getElementsByTagName("td")[3];
+                
+                if (tdName || tdPic || tdPhone) {
+                    let textName = tdName.textContent || tdName.innerText;
+                    let textPic = tdPic.textContent || tdPic.innerText;
+                    let textPhone = tdPhone.textContent || tdPhone.innerText;
+                    
+                    if (textName.toUpperCase().indexOf(input) > -1 || textPic.toUpperCase().indexOf(input) > -1 || textPhone.toUpperCase().indexOf(input) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }       
+            }
         }
     </script>
 

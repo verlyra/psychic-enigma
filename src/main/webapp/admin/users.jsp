@@ -83,6 +83,7 @@
                 <a href="dashboard.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">Dashboard</a>
                 <a href="products.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">INVENTORY</a>
                 <a href="kategori.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER KATEGORI</a>
+                <a href="ukuran.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER UKURAN</a>
                 <a href="users.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase bg-[#FACC15] text-black">MASTER USER</a>
                 <a href="gudang.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER GUDANG</a>
             </nav>
@@ -105,7 +106,18 @@
             <div class="bg-white border-[4px] border-black flex-1 p-6 relative flex flex-col">
                 <h3 class="font-[900] text-2xl uppercase tracking-tighter mb-6 text-white bg-black inline-block relative -top-12 -left-2 px-4 pb-0 pt-2">MASTER USERS</h3>
                 
-                <table class="w-full text-center -mt-8 mb-auto">
+                <div class="-mt-8 mb-4 flex justify-end">
+                    <div class="flex items-center gap-2">
+                        <label class="font-[900] text-black tracking-wider uppercase">FILTER ROLE:</label>
+                        <select id="roleFilter" onchange="filterRole()" class="border-[4px] border-black p-2 font-[900] text-black focus:outline-none uppercase">
+                            <option value="ALL">ALL ROLES</option>
+                            <option value="ADMIN">ADMIN</option>
+                            <option value="CUSTOMER">CUSTOMER</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="w-full text-center mb-auto" id="userTable">
                     <thead>
                         <tr class="border-b-[4px] border-black">
                             <th class="py-3 font-[900] text-black uppercase tracking-wider text-center">USERNAME</th>
@@ -202,6 +214,24 @@
             document.getElementById('edit_username').value = username;
             document.getElementById('edit_role').value = role;
             document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function filterRole() {
+            let filter = document.getElementById("roleFilter").value.toUpperCase();
+            let table = document.getElementById("userTable");
+            let tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+                let tdRole = tr[i].getElementsByTagName("td")[2];
+                if (tdRole) {
+                    let roleText = tdRole.textContent || tdRole.innerText;
+                    if (filter === "ALL" || roleText.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
         }
     </script>
 </body>

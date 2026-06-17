@@ -11,6 +11,7 @@
     int totalUsers = 0;
     int totalGudang = 0;
     int totalKategori = 0;
+    int totalUkuran = 0;
 
     try {
         koneksi k = new koneksi();
@@ -29,11 +30,13 @@
             if(rs3.next()) totalGudang = rs3.getInt(1);
             rs3.close();
             
-            try {
-                ResultSet rs4 = stmt.executeQuery("SELECT COUNT(*) FROM master_kategori");
-                if(rs4.next()) totalKategori = rs4.getInt(1);
-                rs4.close();
-            } catch(Exception ignored) { }
+            ResultSet rs4 = stmt.executeQuery("SELECT COUNT(*) FROM master_kategori");
+            if(rs4.next()) totalKategori = rs4.getInt(1);
+            rs4.close();
+
+            ResultSet rs5 = stmt.executeQuery("SELECT COUNT(*) FROM master_ukuran");
+            if(rs5.next()) totalUkuran = rs5.getInt(1);
+            rs5.close();
             
             stmt.close();
             conn.close();
@@ -72,6 +75,7 @@
                 <a href="dashboard.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase bg-[#FACC15] text-black">Dashboard</a>
                 <a href="products.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">INVENTORY</a>
                 <a href="kategori.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER KATEGORI</a>
+                <a href="ukuran.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER UKURAN</a>
                 <a href="users.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER USER</a>
                 <a href="gudang.jsp" class="px-6 py-4 font-[900] tracking-wider uppercase hover:bg-gray-800 transition-colors">MASTER GUDANG</a>
             </nav>
@@ -113,6 +117,12 @@
             <div class="bg-white border-[4px] border-black p-6 brutal-shadow flex flex-col items-center text-center">
                 <h3 class="text-xl font-[900] uppercase tracking-wider mb-2">TOTAL KATEGORI</h3>
                 <p class="text-6xl font-black text-[#F97316] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]"><%= totalKategori %></p>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="bg-white border-[4px] border-black p-6 brutal-shadow flex flex-col items-center text-center">
+                <h3 class="text-xl font-[900] uppercase tracking-wider mb-2">TOTAL UKURAN</h3>
+                <p class="text-6xl font-black text-[#A855F7] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]"><%= totalUkuran %></p>
             </div>
         </div>
 
