@@ -167,8 +167,7 @@
                                             <tbody>
                                                 <% try { koneksi k=new koneksi(); Connection conn=k.bukaKoneksi();
                                                     DbInit.ensureSchema(conn); Statement stmt=conn.createStatement();
-                                                    ResultSet rs=stmt.executeQuery("SELECT * FROM master_diskon ORDER BY
-                                                    id DESC"); while(rs.next()) { String tipe=rs.getString("tipe");
+                                                    ResultSet rs=stmt.executeQuery("SELECT * FROM master_diskon ORDER BY id DESC"); while(rs.next()) { String tipe=rs.getString("tipe");
                                                     String kode=rs.getString("kode") !=null ? rs.getString("kode") : "-"
                                                     ; String jenis=rs.getString("jenis_potongan"); double
                                                     nilai=rs.getDouble("nilai"); int aktif=rs.getInt("aktif"); String
