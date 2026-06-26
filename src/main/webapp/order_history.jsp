@@ -44,6 +44,9 @@
 
     // ---- Aksi: permintaan pembatalan ----
     String action = request.getParameter("action");
+    String curFilter = request.getParameter("filter");
+    if (curFilter == null) curFilter = "";
+
     if ("request_cancel".equals(action) && "POST".equalsIgnoreCase(request.getMethod())) {
         String idStr = request.getParameter("id");
         if (idStr != null) {
@@ -62,12 +65,37 @@
                 ps.close(); conn.close();
             } catch (Exception ignored) {}
         }
-        response.sendRedirect("order_history.jsp?cancel=requested");
+        String fParam = curFilter.isEmpty() ? "" : ("&filter=" + curFilter);
+        response.sendRedirect("order_history.jsp?cancel=requested" + fParam);
         return;
     }
 
     String uploadFlag = request.getParameter("upload");
     String cancelFlag = request.getParameter("cancel");
+
+    // ---- Hitung jumlah pesanan per status (untuk badge filter) ----
+    java.util.Map<String,Integer> statusCounts = new java.util.LinkedHashMap<>();
+    statusCounts.put("", 0);           // semua
+    for (String f : FLOW) statusCounts.put(f, 0);
+    statusCounts.put("dibatalkan", 0);
+
+    try {
+        koneksi kc = new koneksi();
+        Connection connC = kc.bukaKoneksi();
+        PreparedStatement psC = connC.prepareStatement(
+            "SELECT status, COUNT(*) AS cnt FROM transaksi WHERE id_user = ? GROUP BY status");
+        psC.setInt(1, userId);
+        ResultSet rsC = psC.executeQuery();
+        int total = 0;
+        while (rsC.next()) {
+            String st = rsC.getString("status");
+            int cnt = rsC.getInt("cnt");
+            total += cnt;
+            if (statusCounts.containsKey(st)) statusCounts.put(st, cnt);
+        }
+        statusCounts.put("", total);
+        rsC.close(); psC.close(); connC.close();
+    } catch (Exception ignored) {}
 
     List<Map<String, Object>> orders = new ArrayList<>();
     String errorMsg = "";
@@ -77,12 +105,25 @@
         Connection conn = k.bukaKoneksi();
         DbInit.ensureSchema(conn);
 
+        // Bangun WHERE clause berdasarkan filter
+        String whereClause;
+        if ("dibatalkan".equals(curFilter)) {
+            whereClause = "AND t.status = 'dibatalkan' ";
+        } else if (!curFilter.isEmpty()) {
+            whereClause = "AND t.status = ? ";
+        } else {
+            whereClause = "";
+        }
+
         PreparedStatement psTrx = conn.prepareStatement(
             "SELECT t.id, t.tanggal, t.total_pembayaran, t.status, t.metode_bayar, t.status_bayar, " +
             "t.bukti_transfer, t.ongkir, t.diskon, t.cancel_requested, sp.nama AS kirim_nama " +
             "FROM transaksi t LEFT JOIN master_pengiriman sp ON t.metode_kirim = sp.kode " +
-            "WHERE t.id_user = ? ORDER BY t.tanggal DESC, t.id DESC");
+            "WHERE t.id_user = ? " + whereClause + "ORDER BY t.tanggal DESC, t.id DESC");
         psTrx.setInt(1, userId);
+        if (!curFilter.isEmpty() && !"dibatalkan".equals(curFilter)) {
+            psTrx.setString(2, curFilter);
+        }
         ResultSet rsTrx = psTrx.executeQuery();
 
         Map<Integer, Map<String, Object>> orderById = new LinkedHashMap<>();
@@ -194,6 +235,37 @@
         <% if (!errorMsg.isEmpty()) { %>
         <div class="bg-red-200 border-[4px] border-black p-4 mb-6 brutal-shadow"><p class="font-[900] text-black uppercase m-0">Error: <%= errorMsg %></p></div>
         <% } %>
+
+        <!-- Filter Tabs -->
+        <div class="flex flex-wrap gap-2 mb-6">
+            <%
+                String[][] filterDefs = {
+                    {"",           "SEMUA",     "bg-black text-white",     "bg-white text-black"},
+                    {"pending",    "PENDING",   "bg-black text-white",     "bg-white text-black"},
+                    {"diproses",   "DIPROSES",  "bg-[#3498DB] text-white", "bg-white text-black"},
+                    {"dipacking",  "DIKEMAS",   "bg-[#A855F7] text-white", "bg-white text-black"},
+                    {"dikirim",    "DIKIRIM",   "bg-[#FB923C] text-black", "bg-white text-black"},
+                    {"selesai",    "SELESAI",   "bg-[#4ADE80] text-black", "bg-white text-black"},
+                    {"dibatalkan", "DIBATALKAN","bg-red-400 text-black",   "bg-white text-black"},
+                };
+                for (String[] fd : filterDefs) {
+                    String fKey    = fd[0];
+                    String fLabel  = fd[1];
+                    String activeC = fd[2];
+                    String inactC  = fd[3];
+                    boolean isActive = curFilter.equals(fKey);
+                    int cnt = statusCounts.getOrDefault(fKey, 0);
+            %>
+            <a href="order_history.jsp<%= fKey.isEmpty() ? "" : ("?filter=" + fKey) %>"
+               class="border-[3px] border-black px-4 py-2 font-[900] text-xs uppercase tracking-wider brutal-btn <%= isActive ? activeC : inactC %> hover:opacity-80 transition-opacity flex items-center gap-1">
+                <%= fLabel %>
+                <% if (cnt > 0) { %>
+                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-[900]
+                    <%= isActive ? "bg-white text-black" : "bg-black text-white" %>"><%= cnt %></span>
+                <% } %>
+            </a>
+            <% } %>
+        </div>
 
         <% if (orders.isEmpty()) { %>
         <div class="bg-white border-[4px] border-black p-16 brutal-shadow text-center">
@@ -333,7 +405,7 @@
                             <% } else if (cancelReq == 1) { %>
                             <span class="border-[3px] border-black bg-orange-200 px-4 py-2 font-[900] text-xs uppercase tracking-wide">Menunggu Konfirmasi Pembatalan</span>
                             <% } else if (bisaBatal(status, cancelReq)) { %>
-                            <form action="order_history.jsp?action=request_cancel" method="POST" onsubmit="return confirm('Ajukan pembatalan pesanan ini?');">
+                            <form action="order_history.jsp?action=request_cancel<%= curFilter.isEmpty() ? "" : ("&filter=" + curFilter) %>" method="POST" onsubmit="return confirm('Ajukan pembatalan pesanan ini?');">
                                 <input type="hidden" name="id" value="<%= o.get("id") %>">
                                 <button type="submit" class="border-[3px] border-black bg-white px-4 py-2 font-[900] text-xs uppercase tracking-wide text-red-500 brutal-btn hover:bg-red-50 transition-colors">Batalkan Pesanan</button>
                             </form>
