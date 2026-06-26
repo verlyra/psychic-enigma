@@ -217,16 +217,11 @@
                                                                 onclick='openEdit(<%= rs.getInt("id") %>, <%= toJs(rs.getString("nama")) %>, "<%= tipe %>", <%= toJs(rs.getString("kode")) %>, "<%= jenis %>", <%= nilai %>, <%= rs.getDouble("min_belanja") %>, <%= rs.getDouble("maks_potongan") %>, <%= aktif %>, "<%= tMulai %>", "<%= tSelesai %>")'
                                                                 class="text-[#3498DB] font-[900] uppercase text-sm">EDIT</a>
                                                             <span class="text-black font-black mx-1">|</span>
-                                                            <a href="diskon.jsp?action=delete&id=<%= rs.getInt(" id")
-                                                                %>" class="text-red-500 hover:text-red-700 font-[900]
-                                                                uppercase text-sm" onclick="return confirm('Hapus diskon
-                                                                ini?');">DELETE</a>
+                                                            <a href="diskon.jsp?action=delete&id=<%= rs.getInt("id") %>" class="text-red-500 hover:text-red-700 font-[900] uppercase text-sm" onclick="return confirm('Hapus diskon ini?');">DELETE</a>
                                                         </td>
                                                     </tr>
                                                     <% } rs.close(); stmt.close(); conn.close(); } catch(Exception e) {
-                                                        out.println("<tr>
-                                                        <td colspan='8'>Error: " + e.getMessage() + "</td>
-                                                        </tr>"); }
+                                                        out.println("<tr><td colspan='8'>Error: " + e.getMessage() + "</td></tr>"); }
                                                         %>
                                             </tbody>
                                         </table>
